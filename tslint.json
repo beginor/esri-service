@@ -1,0 +1,35 @@
+{
+  "tslint.enable": true,
+  "extends": "tslint:recommended",
+  "rules": {
+    "quotemark": {
+      "options": "single"
+    },
+    "no-console": {
+      "options": [
+        "debug",
+        "info",
+        "log",
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    },
+    "interface-name": false,
+    "trailing-comma": false,
+    "object-literal-sort-keys": false,
+    "arrow-parens": false,
+    "max-line-length": {
+      "options": [
+        80
+      ]
+    },
+    "one-line": {
+      "options": [
+        "check-open-brace",
+        "check-whitespace"
+      ]
+    },
+    "no-empty": false
+  }
+}

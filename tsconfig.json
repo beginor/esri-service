@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "experimentalDecorators": true,
+    "inlineSources": true,
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+    "module": "es2015",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "./build",
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "stripInternal": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "es5",
+    "types": [
+      "arcgis-js-api"
+    ],
+    "importHelpers": true
+  }
+}
