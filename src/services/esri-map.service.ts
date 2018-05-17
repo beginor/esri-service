@@ -21,9 +21,8 @@ export function getSceneView(): Promise<__esri.SceneView> {
 export function setSceneView(view: __esri.SceneView) {
     sceneView = view;
     if (sceneViewResolvers.length > 0) {
-        const wrapper = { val: sceneView };
         sceneViewResolvers.forEach(resolve => {
-            resolve(wrapper);
+            resolve(sceneView);
         });
         sceneViewResolvers.length = 0;
     }
@@ -43,9 +42,8 @@ export function getMapView(): Promise<__esri.MapView> {
 export function setMapView(view: __esri.MapView) {
     mapView = view;
     if (mapViewResolvers.length > 0) {
-        const wrapper = { val: mapView };
         mapViewResolvers.forEach(resolve => {
-            resolve(wrapper);
+            resolve(mapView);
         });
         mapViewResolvers.length = 0;
     }
