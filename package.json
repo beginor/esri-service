@@ -1,11 +1,10 @@
 {
   "name": "esri-service",
-  "version": "1.0.1",
+  "version": "1.2.4",
   "description": "Common used methods helper for ArcGIS JS API",
-  "main": "build/index.js",
-  "typings": "build/index.d.ts",
+  "main": "dist/esm/esri-service.js",
+  "types": "dist/esm/esri-service.d.ts",
   "scripts": {
-    "publish": "rm -rf build && npm run build && cp src/package.json build/package.json && npm publish build",
     "build": "tsc -p tsconfig.json",
     "test": "test"
   },
@@ -19,6 +18,10 @@
     "url": "https://github.com/beginor/esri-service/issues"
   },
   "homepage": "https://github.com/beginor/esri-service#readme",
+  "dependencies": {
+    "esri-loader": "^2.6.0",
+    "tslib": "^1.9.0"
+  },
   "devDependencies": {
     "@types/arcgis-js-api": "^4.10.0",
     "tslint": "^5.12.0",
