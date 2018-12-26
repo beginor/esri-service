@@ -1,9 +1,7 @@
-import { loadModules, loadScript } from 'esri-loader';
+import { loadModules } from 'esri-loader';
 
-// tslint:disable-next-line:ban-types
 const sceneViewResolvers: Function[] = [];
 let sceneView: __esri.SceneView;
-// tslint:disable-next-line:ban-types
 const mapViewResolvers: Function[] = [];
 let mapView: __esri.MapView;
 
@@ -62,6 +60,7 @@ export async function createBasemapFromId(
 export async function createMap(
     props: __esri.MapProperties
 ): Promise<__esri.Map> {
+    await castLayers(props);
     const [Map] = await loadModules([
         'esri/Map'
     ]);
@@ -149,10 +148,10 @@ export async function createGraphic(
 export async function findViewForLayer<
     TLayer extends __esri.Layer,
     TLayerView extends __esri.LayerView
->(
-    view: __esri.View,
-    layer: TLayer
-): Promise<TLayerView> {
+    >(
+        view: __esri.View,
+        layer: TLayer
+    ): Promise<TLayerView> {
     const layerView = (await view.whenLayerView(layer)) as TLayerView;
     return layerView;
 }
@@ -193,26 +192,25 @@ export function queryLayerGraphics(
     view: __esri.SceneView,
     layer: __esri.FeatureLayer,
     where: string
-): Promise<__esri.Graphic[]> {
-    return new Promise<__esri.Graphic[]>((resolve, reject) => {
+): Promise<__esri.FeatureSet> {
+    return new Promise<__esri.FeatureSet>((resolve, reject) => {
         view.whenLayerView(layer)
             .then((layerView: __esri.FeatureLayerView) => {
                 if (where === layer.definitionExpression) {
                     layerView.queryFeatures()
-                        .then((graphics: __esri.Graphic[]) => {
-                            resolve(graphics);
+                        .then((featureSet: __esri.FeatureSet) => {
+                            resolve(featureSet);
                         })
                         .catch(err => {
                             reject(err);
                         });
-                }
-                else {
+                } else {
                     const handle = layerView.watch('updating', val => {
                         if (!val) {
                             layerView.queryFeatures()
-                                .then((graphics: __esri.Graphic[]) => {
+                                .then((featureSet: __esri.FeatureSet) => {
                                     handle.remove();
-                                    resolve(graphics);
+                                    resolve(featureSet);
                                 })
                                 .catch(err => {
                                     handle.remove();
@@ -231,9 +229,9 @@ export function queryLayerGraphics(
 
 export async function parseRendererFromJSON<
     T extends __esri.Renderer
->(
-    json: any
-): Promise<T> {
+    >(
+        json: any
+    ): Promise<T> {
     const [jsonUtils] = await loadModules([
         'esri/renderers/support/jsonUtils'
     ]);
@@ -353,13 +351,13 @@ export function getViewResolution(view: __esri.SceneView): number {
     return resoluation;
 }
 
-export async function createAction(
-    actionProperties: __esri.ActionProperties
-): Promise<__esri.Action> {
-    const [Action] = await loadModules([
-        'esri/support/Action'
+export async function createActionButton(
+    actionProperties: any
+): Promise<__esri.ActionButton> {
+    const [ActionButton] = await loadModules([
+        'esri/support/actions/ActionButton'
     ]);
-    return new Action(actionProperties);
+    return new ActionButton(actionProperties);
 }
 
 export async function createField(
@@ -521,4 +519,183 @@ export async function createTileLayer(
     ]);
     const result: __esri.TileLayer = new TileLayer(props);
     return result;
+}
+/**
+ * create a webscene instance by json;
+ * @param props webscene json properties
+ */
+export async function createWebScene(
+    props: __esri.WebSceneProperties
+): Promise<__esri.WebScene> {
+    await castLayers(props);
+    let webscene: __esri.WebScene;
+    const [WebScene] = await loadModules(['esri/WebScene']);
+    webscene = new WebScene(props);
+    return webscene;
+}
+
+async function castLayers(props: __esri.MapProperties) {
+    // layers
+    if (!!props.layers) {
+        const layersProps = props.layers as any[];
+        const layers = await createLayers(layersProps);
+        props.layers = layers;
+    }
+    // basemap
+    if (typeof props.basemap !== 'string') {
+        const basemapProps = props.basemap as __esri.BasemapProperties;
+        const layersProps = basemapProps.baseLayers as any[];
+        const layers = await createLayers(layersProps);
+        basemapProps.baseLayers = layers;
+    }
+    // ground;
+    if (typeof props.ground !== 'string') {
+        const groundProps = props.ground as __esri.GroundProperties;
+        const layersProps = groundProps.layers as any[];
+        const layers = await createLayers(layersProps);
+        groundProps.layers = layers;
+    }
+}
+
+/**
+ * Create a layers from properties;
+ * @param layersProps array of layer's properties
+ */
+export async function createLayers(
+    layersProps: any[]
+): Promise<__esri.Layer[]> {
+    const layers = [];
+    for (const layerProps of layersProps) {
+        const layer = await createLayer(layerProps);
+        layers.push(layer);
+    }
+    return layers;
+}
+/**
+ * Create a layer from properties;
+ * @param props layer's properties
+ */
+export async function createLayer(props: any): Promise<__esri.Layer> {
+    const layerType = props.type;
+    delete props.type;
+    let layer: __esri.Layer;
+    switch (layerType) {
+        case 'feature':
+            const [FeatureLayer] = await loadModules([
+                'esri/layers/FeatureLayer'
+            ]);
+            layer = new FeatureLayer(props);
+            break;
+        case 'graphics':
+            const [GraphicsLayer] = await loadModules([
+                'esri/layers/GraphicsLayer'
+            ]);
+            layer = new GraphicsLayer(props);
+            break;
+        case 'tile':
+            const [TileLayer] = await loadModules([
+                'esri/layers/TileLayer'
+            ]);
+            layer = new TileLayer(props);
+            break;
+        case 'web-tile':
+            const [WebTileLayer] = await loadModules([
+                'esri/layers/WebTileLayer'
+            ]);
+            layer = new WebTileLayer(props);
+            break;
+        case 'elevation':
+            const [ElevationLayer] = await loadModules([
+                'esri/layers/ElevationLayer'
+            ]);
+            layer = new ElevationLayer(props);
+            break;
+        case 'imagery':
+            const [ImageryLayer] = await loadModules([
+                'esri/layers/ImageryLayer'
+            ]);
+            layer = new ImageryLayer(props);
+            break;
+        case 'integrated-mesh':
+            const [IntegratedMeshLayer] = await loadModules([
+                'esri/layers/IntegratedMeshLayer'
+            ]);
+            layer = new IntegratedMeshLayer(props);
+            break;
+        case 'map-image':
+            const [MapImageLayer] = await loadModules([
+                'esri/layers/MapImageLayer'
+            ]);
+            layer = new MapImageLayer(props);
+            break;
+        case 'map-notes':
+            const [MapNotesLayer] = await loadModules([
+                'esri/layers/MapNotesLayer'
+            ]);
+            layer = new MapNotesLayer(props);
+            break;
+        case 'point-cloud':
+            const [PointCloudLayer] = await loadModules([
+                'esri/layers/PointCloudLayer'
+            ]);
+            layer = new PointCloudLayer(props);
+            break;
+        case 'scene':
+            const [SceneLayer] = await loadModules(['esri/layers/SceneLayer']);
+            layer = new SceneLayer(props);
+            break;
+        case 'stream':
+            const [StreamLayer] = await loadModules([
+                'esri/layers/StreamLayer'
+            ]);
+            layer = new StreamLayer(props);
+            break;
+        case 'vector-tile':
+            const [VectorTileLayer] = await loadModules([
+                'esri/layers/VectorTileLayer'
+            ]);
+            layer = new VectorTileLayer(props);
+            break;
+        case 'bing-maps':
+            const [BingMapsLayer] = await loadModules([
+                'esri/layers/BingMapsLayer'
+            ]);
+            layer = new BingMapsLayer(props);
+            break;
+        case 'csv':
+            const [CSVLayer] = await loadModules(['esri/layers/CSVLayer']);
+            layer = new CSVLayer(props);
+            break;
+        case 'georss':
+            const [GeoRSSLayer] = await loadModules([
+                'esri/layers/GeoRSSLayer'
+            ]);
+            layer = new GeoRSSLayer(props);
+            break;
+        case 'group':
+            const [GroupLayer] = await loadModules(['esri/layers/GroupLayer']);
+            layer = new GroupLayer(props);
+            break;
+        case 'kml':
+            const [KMLLayer] = await loadModules(['esri/layers/KMLLayer']);
+            layer = new KMLLayer(props);
+            break;
+        case 'open-street-map':
+            const [OpenStreetMapLayer] = await loadModules([
+                'esri/layers/OpenStreetMapLayer'
+            ]);
+            layer = new OpenStreetMapLayer(props);
+            break;
+        case 'wms':
+            const [WMSLayer] = await loadModules(['esri/layers/WMSLayer']);
+            layer = new WMSLayer(props);
+            break;
+        case 'wmts':
+            const [WMTSLayer] = await loadModules(['esri/layers/WMTSLayer']);
+            layer = new WMTSLayer(props);
+            break;
+        default:
+            throw new Error(`Unknown layer type: ${layerType}`);
+    }
+    return layer;
 }

@@ -20,12 +20,12 @@
   },
   "homepage": "https://github.com/beginor/esri-service#readme",
   "devDependencies": {
-    "@types/arcgis-js-api": "^4.7.0",
-    "tslint": "^5.9.0",
-    "typescript": "~2.4.2"
+    "@types/arcgis-js-api": "^4.10.0",
+    "tslint": "^5.12.0",
+    "typescript": "^3.2.0"
   },
-  "dependencies": {
-    "esri-loader": "^2.3.0",
+  "peerDependencies": {
+    "esri-loader": "^2.6.0",
     "tslib": "^1.9.0"
   }
 }
