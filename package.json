@@ -1,9 +1,9 @@
 {
   "name": "esri-service",
-  "version": "1.2.4",
+  "version": "2.0.1",
   "description": "Common used methods helper for ArcGIS JS API",
-  "main": "dist/esm/esri-service.js",
-  "types": "dist/esm/esri-service.d.ts",
+  "main": "dist/esri-service.js",
+  "types": "dist/esri-service.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "test"

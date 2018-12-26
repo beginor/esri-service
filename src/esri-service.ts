@@ -1,19 +1,20 @@
-import { loadModules } from 'esri-loader';
+import {loadModules} from 'esri-loader';
 
+// tslint:disable-next-line:ban-types
 const sceneViewResolvers: Function[] = [];
 let sceneView: __esri.SceneView;
+// tslint:disable-next-line:ban-types
 const mapViewResolvers: Function[] = [];
 let mapView: __esri.MapView;
 
 export function getSceneView(): Promise<__esri.SceneView> {
-    const promise = new Promise<__esri.SceneView>((resolve, reject) => {
+    return new Promise<__esri.SceneView>((resolve, reject) => {
         if (sceneView) {
             resolve(sceneView);
             return;
         }
         sceneViewResolvers.push(resolve);
     });
-    return promise;
 }
 
 export function setSceneView(view: __esri.SceneView) {
@@ -27,14 +28,13 @@ export function setSceneView(view: __esri.SceneView) {
 }
 
 export function getMapView(): Promise<__esri.MapView> {
-    const promise = new Promise<any>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
         if (mapView) {
             resolve(mapView);
             return;
         }
         mapViewResolvers.push(resolve);
     });
-    return promise;
 }
 
 export function setMapView(view: __esri.MapView) {
@@ -53,59 +53,54 @@ export async function createBasemapFromId(
     const [Basemap] = await loadModules([
         'esri/Basemap'
     ]);
-    const basemap: __esri.Basemap = Basemap.fromId(basemapId);
-    return basemap;
+    return Basemap.fromId(basemapId);
 }
 
 export async function createMap(
-    props: __esri.MapProperties
+    properties: __esri.MapProperties
 ): Promise<__esri.Map> {
-    await castLayers(props);
+    await castLayers(properties);
     const [Map] = await loadModules([
         'esri/Map'
     ]);
-    const map = new Map(props);
-    return map;
+    await castLayers(properties);
+    return new Map(properties);
 }
 
 export async function createMapView(
-    props: __esri.MapViewProperties
+    properties: __esri.MapViewProperties
 ): Promise<__esri.MapView> {
     const [MapView] = await loadModules([
         'esri/views/MapView'
     ]);
-    const view: __esri.MapView = new MapView(props);
-    return view;
+    return new MapView(properties);
 }
 
 export async function createSceneView(
-    props: __esri.SceneViewProperties
+    properties: __esri.SceneViewProperties
 ): Promise<__esri.SceneView> {
     const [SceneView] = await loadModules([
         'esri/views/SceneView'
     ]);
-    const view: __esri.SceneView = new SceneView(props);
-    return view;
+    return new SceneView(properties);
 }
 
 export async function createLocalSource(
-    props: __esri.BasemapProperties[]
+    propertiesArr: __esri.BasemapProperties[]
 ): Promise<__esri.LocalBasemapsSource> {
     const basemapArr: __esri.Basemap[] = [];
-    // tslint:disable-next-line:max-line-length
     const [Basemap, LocalBasemapsSource] = await loadModules([
         'esri/Basemap',
         'esri/widgets/BasemapGallery/support/LocalBasemapsSource'
     ]);
     //
-    for (const prop of props) {
-        const basemap = new Basemap(prop);
+    for (const properties of propertiesArr) {
+        const basemap = new Basemap(properties);
         basemapArr.push(basemap);
     }
-    const localSource = new LocalBasemapsSource({
+    return new LocalBasemapsSource({
         basemaps: basemapArr
     });
-    return localSource;
 }
 
 export async function createBasemapsGallery(
@@ -119,8 +114,7 @@ export async function createBasemapsGallery(
     galleryProperties.container = document.createElement('div');
     const gallery = new BasemapGallery(galleryProperties);
     expandPropertis.content = gallery.domNode;
-    const expand = new Expand(expandPropertis);
-    return expand;
+    return new Expand(expandPropertis);
 }
 
 export async function executeQuery(
@@ -132,17 +126,16 @@ export async function executeQuery(
     const queryTask: __esri.QueryTask = new QueryTask({
         url: serviceUrl
     });
-    const result = await queryTask.execute(query);
-    return result;
+    return queryTask.execute(query, requestOptions);
 }
 
 export async function createGraphic(
-    graphicProps?: __esri.GraphicProperties
+    properties?: __esri.GraphicProperties
 ): Promise<__esri.Graphic> {
     const [Graphic] = await loadModules([
         'esri/Graphic'
     ]);
-    return new Graphic(graphicProps);
+    return new Graphic(properties);
 }
 
 export async function findViewForLayer<
@@ -152,13 +145,12 @@ export async function findViewForLayer<
         view: __esri.View,
         layer: TLayer
     ): Promise<TLayerView> {
-    const layerView = (await view.whenLayerView(layer)) as TLayerView;
-    return layerView;
+    return (await view.whenLayerView(layer)) as TLayerView;
 }
 
 export async function buffer(
     geometryServiceUrl: string,
-    props: __esri.BufferParametersProperties
+    properties: __esri.BufferParametersProperties
 ): Promise<__esri.Polygon[]> {
     const [GeometryService, BufferParameters] = await loadModules([
         'esri/tasks/GeometryService',
@@ -167,19 +159,18 @@ export async function buffer(
     const geoSvc: __esri.GeometryService
         = new GeometryService({ url: geometryServiceUrl });
     const params: __esri.BufferParameters = new BufferParameters(
-        props
+        properties
     );
-    const result = await geoSvc.buffer(params);
-    return result;
+    return geoSvc.buffer(params);
 }
 
 export async function queryLayerFeatures(
     layer: __esri.FeatureLayer,
-    queryProps: __esri.QueryProperties
+    properties: __esri.QueryProperties
 ): Promise<__esri.FeatureSet> {
     const query = layer.createQuery();
-    Object.assign(query, queryProps);
-    return await layer.queryFeatures(query);
+    Object.assign(query, properties);
+    return layer.queryFeatures(query);
 }
 
 /**
@@ -238,38 +229,6 @@ export async function parseRendererFromJSON<
     return jsonUtils.fromJSON(json);
 }
 
-export async function createSimpleLineSymbol(
-    color: string | number[],
-    width: number,
-    style: string
-): Promise<__esri.SimpleLineSymbol> {
-    const [SimpleLineSymbol, Color] = await loadModules([
-        'esri/symbols/SimpleLineSymbol',
-        'esri/Color'
-    ]);
-    return new SimpleLineSymbol({
-        color: new Color(color),
-        width,
-        style: 'short-dot'
-    });
-}
-
-export async function createSimpleFillSymbol(
-    color: number[],
-    styles: string,
-    out: any
-): Promise<__esri.SimpleFillSymbol> {
-    const [SimpleFillSymbol, Color] = await loadModules([
-        'esri/symbols/SimpleFillSymbol',
-        'esri/Color'
-    ]);
-    return new SimpleFillSymbol({
-        color: new Color(color),
-        style: styles,
-        outline: out
-    });
-}
-
 export async function parseWebSceneFromJSON(
     json: any
 ): Promise<__esri.WebScene> {
@@ -317,24 +276,6 @@ export async function createPoint(
     return new Point(pointProps);
 }
 
-export async function createPointSymbol3D(
-    pointSymbol3DProps: __esri.PointSymbol3DProperties
-): Promise<__esri.PointSymbol3D> {
-    const [PointSymbol3D] = await loadModules([
-        'esri/symbols/PointSymbol3D'
-    ]);
-    return new PointSymbol3D(pointSymbol3DProps);
-}
-
-export async function createIconSymbol3DLayer(
-    iconSymbol3DLayerProps: __esri.IconSymbol3DLayerProperties
-): Promise<__esri.IconSymbol3DLayer> {
-    const [IconSymbol3DLayer] = await loadModules([
-        'esri/symbols/IconSymbol3DLayer'
-    ]);
-    return new IconSymbol3DLayer(iconSymbol3DLayerProps);
-}
-
 export async function createPopupTemplate(
     popupTemplateProps: __esri.PopupTemplateProperties
 ): Promise<__esri.PopupTemplate> {
@@ -351,8 +292,19 @@ export function getViewResolution(view: __esri.SceneView): number {
     return resoluation;
 }
 
+export interface ActionButtonProperties {
+    active?: boolean;
+    className?: string;
+    disabled?: boolean;
+    id?: string;
+    image?: string;
+    title?: string;
+    type?: 'button' | 'toggle';
+    visible?: string;
+}
+
 export async function createActionButton(
-    actionProperties: any
+    actionProperties: ActionButtonProperties
 ): Promise<__esri.ActionButton> {
     const [ActionButton] = await loadModules([
         'esri/support/actions/ActionButton'
@@ -361,12 +313,12 @@ export async function createActionButton(
 }
 
 export async function createField(
-    fieldProperties?: __esri.FieldProperties
+    properties?: __esri.FieldProperties
 ): Promise<__esri.Field> {
     const [Field] = await loadModules([
         'esri/layers/support/Field'
     ]);
-    return new Field(fieldProperties);
+    return new Field(properties);
 }
 
 export async function parseLabelClassFromJSON(
@@ -387,15 +339,6 @@ export async function parseSymbolFromJson<T extends __esri.Symbol>(
     return jsonUtils.fromJSON(json);
 }
 
-export async function createColor(
-    colorProperties: any
-): Promise<__esri.Color> {
-    const [Color] = await loadModules([
-        'esri/Color'
-    ]);
-    return new Color(colorProperties);
-}
-
 export async function parsePresentationFromJSON(
     json: any
 ): Promise<__esri.Presentation> {
@@ -405,7 +348,7 @@ export async function parsePresentationFromJSON(
     return Presentation.fromJSON(json);
 }
 
-export async function createLegend(
+export async function createExpandableLegend(
     legendProps: __esri.LegendProperties,
     expandProps: __esri.ExpandProperties
 ): Promise<__esri.Expand> {
@@ -417,78 +360,17 @@ export async function createLegend(
     const legend = new Legend(legendProps);
     expandProps.view = legendProps.view;
     expandProps.content = legend.domNode;
-    const expand: __esri.Expand = new Expand(expandProps);
-    return expand;
-}
-
-export async function createImageryLayer(
-    props: __esri.ImageryLayerProperties
-): Promise<__esri.ImageryLayer> {
-    const [ImageryLayer] = await loadModules([
-        'esri/layers/ImageryLayer'
-    ]);
-    const layer: __esri.ImageryLayer = new ImageryLayer(props);
-    return layer;
-}
-
-export async function createMapImage(
-    props: __esri.MapImageProperties
-): Promise<__esri.MapImage> {
-    const [MapImage] = await loadModules([
-        'esri/layers/support/MapImage'
-    ]);
-    const image: __esri.MapImage = new MapImage(props);
-    return image;
-}
-
-export async function createMapImageLayer(
-    props: __esri.MapImageLayerProperties
-): Promise<__esri.MapImageLayer> {
-    const [MapImageLayer] = await loadModules([
-        'esri/layers/MapImageLayer'
-    ]);
-    const layer: __esri.MapImageLayer = new MapImageLayer(props);
-    return layer;
-}
-
-export async function createGraphicsLayer(
-    props: __esri.GraphicsLayerProperties
-): Promise<__esri.GraphicsLayer> {
-    const [GraphicsLayer] = await loadModules([
-        'esri/layers/GraphicsLayer'
-    ]);
-    const layer: __esri.GraphicsLayer = new GraphicsLayer(props);
-    return layer;
-}
-
-export async function createWebTileLayer(
-    props: __esri.WebTileLayerProperties
-): Promise<__esri.WebTileLayer> {
-    const [WebTileLayer] = await loadModules([
-        'esri/layers/WebTileLayer'
-    ]);
-    const layer: __esri.WebTileLayer = new WebTileLayer(props);
-    return layer;
+    return new Expand(expandProps);
 }
 
 export async function createBasemap(
-    props: __esri.BasemapProperties
+    properties: __esri.BasemapProperties
 ): Promise<__esri.Basemap> {
+    properties.baseLayers = await createLayers(properties.baseLayers as any[]);
     const [Basemap] = await loadModules([
         'esri/Basemap'
     ]);
-    const basemap: __esri.Basemap = new Basemap(props);
-    return basemap;
-}
-
-export async function createFeatureLayer(
-    props: __esri.FeatureLayerProperties
-): Promise<__esri.FeatureLayer> {
-    const [FeatureLayer] = await loadModules([
-        'esri/layers/FeatureLayer'
-    ]);
-    const layer: __esri.FeatureLayer = new FeatureLayer(props);
-    return layer;
+    return new Basemap(properties);
 }
 
 export async function parseFeatureSetFromJson(
@@ -511,49 +393,37 @@ export async function createCollection<T>(
     return result;
 }
 
-export async function createTileLayer(
-    props: __esri.TileLayerProperties
-): Promise<__esri.TileLayer> {
-    const [TileLayer] = await loadModules([
-        'esri/layers/TileLayer'
-    ]);
-    const result: __esri.TileLayer = new TileLayer(props);
-    return result;
-}
 /**
  * create a webscene instance by json;
- * @param props webscene json properties
+ * @param properties webscene json properties
  */
 export async function createWebScene(
-    props: __esri.WebSceneProperties
+    properties: __esri.WebSceneProperties
 ): Promise<__esri.WebScene> {
-    await castLayers(props);
+    await castLayers(properties);
     let webscene: __esri.WebScene;
     const [WebScene] = await loadModules(['esri/WebScene']);
-    webscene = new WebScene(props);
+    webscene = new WebScene(properties);
     return webscene;
 }
 
-async function castLayers(props: __esri.MapProperties) {
+async function castLayers(properties: __esri.MapProperties) {
     // layers
-    if (!!props.layers) {
-        const layersProps = props.layers as any[];
-        const layers = await createLayers(layersProps);
-        props.layers = layers;
+    if (!!properties.layers) {
+        const layersProps = properties.layers as any[];
+        properties.layers = await createLayers(layersProps);
     }
     // basemap
-    if (typeof props.basemap !== 'string') {
-        const basemapProps = props.basemap as __esri.BasemapProperties;
+    if (typeof properties.basemap !== 'string') {
+        const basemapProps = properties.basemap as __esri.BasemapProperties;
         const layersProps = basemapProps.baseLayers as any[];
-        const layers = await createLayers(layersProps);
-        basemapProps.baseLayers = layers;
+        basemapProps.baseLayers = await createLayers(layersProps);
     }
     // ground;
-    if (typeof props.ground !== 'string') {
-        const groundProps = props.ground as __esri.GroundProperties;
+    if (typeof properties.ground !== 'string') {
+        const groundProps = properties.ground as __esri.GroundProperties;
         const layersProps = groundProps.layers as any[];
-        const layers = await createLayers(layersProps);
-        groundProps.layers = layers;
+        groundProps.layers = await createLayers(layersProps);
     }
 }
 
@@ -561,9 +431,9 @@ async function castLayers(props: __esri.MapProperties) {
  * Create a layers from properties;
  * @param layersProps array of layer's properties
  */
-export async function createLayers(
+export async function createLayers<T extends __esri.Layer>(
     layersProps: any[]
-): Promise<__esri.Layer[]> {
+): Promise<T[]> {
     const layers = [];
     for (const layerProps of layersProps) {
         const layer = await createLayer(layerProps);
@@ -575,10 +445,12 @@ export async function createLayers(
  * Create a layer from properties;
  * @param props layer's properties
  */
-export async function createLayer(props: any): Promise<__esri.Layer> {
+export async function createLayer<T extends __esri.Layer>(
+    props: any
+): Promise<T> {
     const layerType = props.type;
     delete props.type;
-    let layer: __esri.Layer;
+    let layer: T;
     switch (layerType) {
         case 'feature':
             const [FeatureLayer] = await loadModules([
