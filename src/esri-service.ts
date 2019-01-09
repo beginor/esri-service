@@ -513,7 +513,9 @@ export async function createLayer<T extends __esri.Layer>(
             layer = new PointCloudLayer(props);
             break;
         case 'scene':
-            const [SceneLayer] = await loadModules(['esri/layers/SceneLayer']);
+            const [SceneLayer] = await loadModules([
+                'esri/layers/SceneLayer'
+            ]);
             layer = new SceneLayer(props);
             break;
         case 'stream':
@@ -535,7 +537,9 @@ export async function createLayer<T extends __esri.Layer>(
             layer = new BingMapsLayer(props);
             break;
         case 'csv':
-            const [CSVLayer] = await loadModules(['esri/layers/CSVLayer']);
+            const [CSVLayer] = await loadModules([
+                'esri/layers/CSVLayer'
+            ]);
             layer = new CSVLayer(props);
             break;
         case 'georss':
@@ -545,11 +549,15 @@ export async function createLayer<T extends __esri.Layer>(
             layer = new GeoRSSLayer(props);
             break;
         case 'group':
-            const [GroupLayer] = await loadModules(['esri/layers/GroupLayer']);
+            const [GroupLayer] = await loadModules([
+                'esri/layers/GroupLayer'
+            ]);
             layer = new GroupLayer(props);
             break;
         case 'kml':
-            const [KMLLayer] = await loadModules(['esri/layers/KMLLayer']);
+            const [KMLLayer] = await loadModules([
+                'esri/layers/KMLLayer'
+            ]);
             layer = new KMLLayer(props);
             break;
         case 'open-street-map':
@@ -559,15 +567,146 @@ export async function createLayer<T extends __esri.Layer>(
             layer = new OpenStreetMapLayer(props);
             break;
         case 'wms':
-            const [WMSLayer] = await loadModules(['esri/layers/WMSLayer']);
+            const [WMSLayer] = await loadModules([
+                'esri/layers/WMSLayer'
+            ]);
             layer = new WMSLayer(props);
             break;
         case 'wmts':
-            const [WMTSLayer] = await loadModules(['esri/layers/WMTSLayer']);
+            const [WMTSLayer] = await loadModules([
+                'esri/layers/WMTSLayer'
+            ]);
             layer = new WMTSLayer(props);
             break;
         default:
             throw new Error(`Unknown layer type: ${layerType}`);
     }
     return layer;
+}
+
+export function createFeatureLayer(
+    properties: __esri.FeatureLayerProperties
+): Promise<__esri.FeatureLayer> {
+    Object.assign(properties, { type: 'feature' });
+    return createLayer<__esri.FeatureLayer>(properties);
+}
+export function createGraphicsLayer(
+    properties: __esri.GraphicsLayerProperties
+): Promise<__esri.GraphicsLayer> {
+    Object.assign(properties, { type: 'graphics' });
+    return createLayer<__esri.GraphicsLayer>(properties);
+}
+export function createTileLayer(
+    properties: __esri.TileLayerProperties
+): Promise<__esri.TileLayer> {
+    Object.assign(properties, { type: 'tile' });
+    return createLayer<__esri.TileLayer>(properties);
+}
+export function createWebTileLayer(
+    properties: __esri.WebTileLayerProperties
+): Promise<__esri.WebTileLayer> {
+    Object.assign(properties, { type: 'web-tile' });
+    return createLayer<__esri.WebTileLayer>(properties);
+}
+export function createElevationLayer(
+    properties: __esri.ElevationLayerProperties
+): Promise<__esri.ElevationLayer> {
+    Object.assign(properties, { type: 'elevation' });
+    return createLayer<__esri.ElevationLayer>(properties);
+}
+export function createImageryLayer(
+    properties: __esri.ImageryLayerProperties
+): Promise<__esri.ImageryLayer> {
+    Object.assign(properties, { type: 'imagery' });
+    return createLayer<__esri.ImageryLayer>(properties);
+}
+export function createIntegratedMeshLayer(
+    properties: __esri.IntegratedMeshLayerProperties
+): Promise<__esri.IntegratedMeshLayer> {
+    Object.assign(properties, { type: 'integrated-mesh' });
+    return createLayer<__esri.IntegratedMeshLayer>(properties);
+}
+export function createMapImageLayer(
+    properties: __esri.MapImageLayerProperties
+): Promise<__esri.MapImageLayer> {
+    Object.assign(properties, { type: 'map-image' });
+    return createLayer<__esri.MapImageLayer>(properties);
+}
+export function createMapNotesLayer(
+    properties: __esri.MapNotesLayerProperties
+): Promise<__esri.MapNotesLayer> {
+    Object.assign(properties, { type: 'map-notes' });
+    return createLayer<__esri.MapNotesLayer>(properties);
+}
+export function createPointCloudLayer(
+    properties: __esri.PointCloudLayerProperties
+): Promise<__esri.PointCloudLayer> {
+    Object.assign(properties, { type: 'point-cloud' });
+    return createLayer<__esri.PointCloudLayer>(properties);
+}
+export function createSceneLayer(
+    properties: __esri.SceneLayerProperties
+): Promise<__esri.SceneLayer> {
+    Object.assign(properties, { type: 'scene ' });
+    return createLayer<__esri.SceneLayer>(properties);
+}
+export function createStreamLayer(
+    properties: __esri.StreamLayerProperties
+): Promise<__esri.StreamLayer> {
+    Object.assign(properties, { type: 'stream ' });
+    return createLayer<__esri.StreamLayer>(properties);
+}
+export function createVectorTileLayer(
+    properties: __esri.VectorTileLayerProperties
+): Promise<__esri.VectorTileLayer> {
+    Object.assign(properties, { type: 'vector-tile' });
+    return createLayer<__esri.VectorTileLayer>(properties);
+}
+export function createBingMapsLayer(
+    properties: __esri.BingMapsLayerProperties
+): Promise<__esri.BingMapsLayer> {
+    Object.assign(properties, { type: 'bing-maps' });
+    return createLayer<__esri.BingMapsLayer>(properties);
+}
+export function createCSVLayer(
+    properties: __esri.CSVLayerProperties
+): Promise<__esri.CSVLayer> {
+    Object.assign(properties, { type: 'csv' });
+    return createLayer<__esri.CSVLayer>(properties);
+}
+export function createGeoRSSLayer(
+    properties: __esri.GeoRSSLayerProperties
+): Promise<__esri.GeoRSSLayer> {
+    Object.assign(properties, { type: 'georss' });
+    return createLayer<__esri.GeoRSSLayer>(properties);
+}
+export function createGroupLayer(
+    properties: __esri.GroupLayerProperties
+): Promise<__esri.GroupLayer> {
+    Object.assign(properties, { type: 'group' });
+    return createLayer<__esri.GroupLayer>(properties);
+}
+export function createKMLLayer(
+    properties: __esri.KMLLayerProperties
+): Promise<__esri.KMLLayer> {
+    Object.assign(properties, { type: 'kml' });
+    return createLayer<__esri.KMLLayer>(properties);
+}
+export function createOpenStreetMapLayer(
+    properties: __esri.OpenStreetMapLayerProperties
+): Promise<__esri.OpenStreetMapLayer> {
+    Object.assign(properties, { type: 'open-street-map' });
+    return createLayer<__esri.OpenStreetMapLayer>(properties);
+}
+export function createWMSLayer(
+    properties: __esri.WMSLayerProperties
+): Promise<__esri.WMSLayer> {
+    Object.assign(properties, { type: 'wms' });
+    return createLayer<__esri.WMSLayer>(properties);
+}
+export function createWMTSLayer(
+    properties: __esri.WMTSLayerProperties
+): Promise<__esri.WMTSLayer> {
+    Object.assign(properties, { type: 'wmts' });
+    return createLayer<__esri.WMTSLayer>(properties);
 }
