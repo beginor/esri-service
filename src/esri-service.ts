@@ -1,4 +1,4 @@
-import {loadModules} from 'esri-loader';
+import { loadModules } from 'esri-loader';
 
 // tslint:disable-next-line:ban-types
 const sceneViewResolvers: Function[] = [];
