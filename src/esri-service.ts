@@ -549,6 +549,9 @@ export async function createLayer<T extends __esri.Layer>(
             layer = new GeoRSSLayer(props);
             break;
         case 'group':
+            if (!!props.layers) {
+                props.layers = await createLayers(props.layers);
+            }
             const [GroupLayer] = await loadModules([
                 'esri/layers/GroupLayer'
             ]);
