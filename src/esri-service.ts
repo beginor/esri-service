@@ -129,6 +129,14 @@ export async function executeQuery(
     return queryTask.execute(query, requestOptions);
 }
 
+export async function createQueryTask(
+    properties: __esri.QueryTaskProperties
+): Promise<__esri.QueryTask> {
+    const [QueryTask] = await loadModules(['esri/tasks/QueryTask']);
+    const queryTask: __esri.QueryTask = new QueryTask(properties);
+    return queryTask;
+}
+
 export async function createGraphic(
     properties?: __esri.GraphicProperties
 ): Promise<__esri.Graphic> {
