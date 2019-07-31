@@ -422,13 +422,13 @@ async function castLayers(properties: __esri.MapProperties) {
         properties.layers = await createLayers(layersProps);
     }
     // basemap
-    if (typeof properties.basemap !== 'string') {
+    if (!!properties.basemap && typeof properties.basemap !== 'string') {
         const basemapProps = properties.basemap as __esri.BasemapProperties;
         const layersProps = basemapProps.baseLayers as any[];
         basemapProps.baseLayers = await createLayers(layersProps);
     }
     // ground;
-    if (typeof properties.ground !== 'string') {
+    if (!!properties.ground && typeof properties.ground !== 'string') {
         const groundProps = properties.ground as __esri.GroundProperties;
         const layersProps = groundProps.layers as any[];
         groundProps.layers = await createLayers(layersProps);
