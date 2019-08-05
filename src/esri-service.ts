@@ -122,11 +122,20 @@ export async function executeQuery(
     query: __esri.QueryProperties | __esri.Query,
     requestOptions?: any
 ): Promise<__esri.FeatureSet> {
-    const [QueryTask] = await loadModules(['esri/tasks/QueryTask']);
+    const [QueryTask, Query] = await loadModules([
+        'esri/tasks/QueryTask',
+        'esri/tasks/support/Query'
+    ]);
     const queryTask: __esri.QueryTask = new QueryTask({
         url: serviceUrl
     });
-    return queryTask.execute(query, requestOptions);
+    let queryParams: any = query;
+    // tslint:disable-next-line: no-string-literal
+    if (!query['declaredClass']) {
+        queryParams = new Query(query);
+    }
+    const fset = await queryTask.execute(queryParams, requestOptions);
+    return fset;
 }
 
 export async function createQueryTask(
