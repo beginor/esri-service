@@ -730,3 +730,46 @@ export function createWMTSLayer(
     Object.assign(properties, { type: 'wmts' });
     return createLayer<__esri.WMTSLayer>(properties);
 }
+
+export async function createDistanceMeasurement2D(
+    properties: __esri.DistanceMeasurement2DProperties
+): Promise<__esri.DistanceMeasurement2D> {
+    const [DistanceMeasurement2D] = await loadModules([
+        'esri/widgets/DistanceMeasurement2D'
+    ]);
+    return new DistanceMeasurement2D(properties);
+}
+
+export async function createDirectLineMeasurement3D(
+    properties: __esri.DirectLineMeasurement3DProperties
+): Promise<__esri.DirectLineMeasurement3D> {
+    const [DirectLineMeasurement3D] = await loadModules([
+        'esri/widgets/DirectLineMeasurement3D'
+    ]);
+    return new DirectLineMeasurement3D(properties);
+}
+
+export async function createAreaMeasurement2D(
+    properties: __esri.AreaMeasurement2DProperties
+): Promise<__esri.AreaMeasurement2D> {
+    const [AreaMeasurement2D] = await loadModules([
+        'esri/widgets/AreaMeasurement2D'
+    ]);
+    return new AreaMeasurement2D(properties);
+}
+
+export async function createAreaMeasurement3D(
+    properties: __esri.AreaMeasurement3DProperties
+): Promise<__esri.AreaMeasurement3D> {
+    const [AreaMeasurement3D] = await loadModules([
+        'esri/widgets/AreaMeasurement3D'
+    ]);
+    return new AreaMeasurement3D(properties);
+}
+
+export async function createWatchUtils(): Promise<__esri.watchUtils> {
+    const [watchUtils] = await loadModules([
+        'esri/core/watchUtils'
+    ]);
+    return watchUtils;
+}
