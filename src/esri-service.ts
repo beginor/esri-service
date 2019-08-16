@@ -766,3 +766,10 @@ export async function createAreaMeasurement3D(
     ]);
     return new AreaMeasurement3D(properties);
 }
+
+export async function createWatchUtils(): Promise<__esri.watchUtils> {
+    const [watchUtils] = await loadModules([
+        'esri/core/watchUtils'
+    ]);
+    return watchUtils;
+}
