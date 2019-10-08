@@ -485,7 +485,23 @@ export async function createLayer<T extends __esri.Layer>(
             const [TileLayer] = await loadModules([
                 'esri/layers/TileLayer'
             ]);
+            let sublayers: __esri.SublayerProperties[];
+            if (!!props.sublayers) {
+                sublayers = props.sublayers;
+                delete props.sublayers;
+            }
             layer = new TileLayer(props);
+            if (!!sublayers) {
+                await layer.load();
+                const tile = layer as unknown as __esri.TileLayer;
+                for (const sublayer of sublayers) {
+                    const subl = tile.sublayers.find(l => l.id === sublayer.id);
+                    subl.title = sublayer.title;
+                    subl.legendEnabled = sublayer.legendEnabled;
+                    subl.popupEnabled = sublayer.popupEnabled;
+                    subl.popupTemplate = sublayer.popupTemplate as any;
+                }
+            }
             break;
         case 'web-tile':
             const [WebTileLayer] = await loadModules([
