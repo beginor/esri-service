@@ -515,6 +515,12 @@ export async function createLayer<T extends __esri.Layer>(
             ]);
             layer = new ElevationLayer(props);
             break;
+        case 'exaggerated-elevation':
+            const [ExaggeratedElevationLayer] = await loadModules([
+                'beginor/ExaggeratedElevationLayer'
+            ]);
+            layer = new ExaggeratedElevationLayer(props);
+            break;
         case 'imagery':
             const [ImageryLayer] = await loadModules([
                 'esri/layers/ImageryLayer'
@@ -650,6 +656,13 @@ export function createElevationLayer(
     Object.assign(properties, { type: 'elevation' });
     return createLayer<__esri.ElevationLayer>(properties);
 }
+export function createExaggeratedElevationLayer(
+    properties: { url: string; exaggeration: number; }
+): Promise<__esri.BaseElevationLayer> {
+    Object.assign(properties, { type: 'exaggerated-elevation' });
+    return createLayer<__esri.BaseElevationLayer>(properties);
+}
+
 export function createImageryLayer(
     properties: __esri.ImageryLayerProperties
 ): Promise<__esri.ImageryLayer> {
