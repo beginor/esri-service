@@ -802,3 +802,25 @@ export async function createWatchUtils(): Promise<__esri.watchUtils> {
     ]);
     return watchUtils;
 }
+
+/**
+ * fly to target with random heading and tilt, default zoom level is 17.
+ */
+export async function flyTo(
+    view: __esri.SceneView,
+    // tslint:disable-next-line: max-line-length
+    target: number[] | __esri.Geometry | __esri.Geometry[] | __esri.Collection<__esri.Geometry> | __esri.Graphic | __esri.Graphic[] | __esri.Collection<__esri.Graphic> | __esri.Viewpoint | __esri.Camera,
+    zoom: number = 17
+): Promise<void> {
+    let heading = Math.random() * 80.0 - 40.0;
+    heading = view.camera.heading + heading;
+    const tilt = 75.0 - Math.random() * 15.0 ;
+    let z = view.zoom;
+    if (z < zoom) {
+        z = zoom;
+    }
+    await view.goTo(
+        { target, heading, tilt, zoom: z },
+        { animate: true, easing: 'in-out-cubic' }
+    );
+}
