@@ -383,8 +383,12 @@ export async function createExpandableLegend(
 export async function createBasemap(
     properties: __esri.BasemapProperties
 ): Promise<__esri.Basemap> {
-    properties.baseLayers = await createLayers(properties.baseLayers as any[]);
-    const [Basemap] = await loadModules([
+    if (!!properties.baseLayers) {
+        properties.baseLayers = await createLayers(
+            properties.baseLayers as any[]
+        );
+    }
+    const [Basemap] = await loadModules<[__esri.BasemapConstructor]>([
         'esri/Basemap'
     ]);
     return new Basemap(properties);
@@ -393,7 +397,7 @@ export async function createBasemap(
 export async function parseFeatureSetFromJson(
     json: any
 ): Promise<__esri.FeatureSet> {
-    const [FeatureSet] = await loadModules([
+    const [FeatureSet] = await loadModules<[__esri.FeatureSetConstructor]>([
         'esri/tasks/support/FeatureSet'
     ]);
     const result: __esri.FeatureSet = FeatureSet.fromJSON(json);
@@ -517,7 +521,7 @@ export async function createLayer<T extends __esri.Layer>(
             break;
         case 'exaggerated-elevation':
             const [ExaggeratedElevationLayer] = await loadModules([
-                'beginor/ExaggeratedElevationLayer'
+                'beginor/layers/ExaggeratedElevationLayer'
             ]);
             layer = new ExaggeratedElevationLayer(props);
             break;
@@ -824,3 +828,58 @@ export async function flyTo(
         { animate: true, easing: 'in-out-cubic' }
     );
 }
+
+export async function createFeatureSet(
+    properties: __esri.FeatureSetProperties
+): Promise<__esri.FeatureSet> {
+    const [FeatureSet] = await loadModules<[__esri.FeatureSetConstructor]>([
+        'esri/tasks/support/FeatureSet'
+    ]);
+    return new FeatureSet(properties);
+}
+
+export interface BaseRendererProperties {
+    view: __esri.SceneView;
+    alpha?: boolean;
+    antialias?: boolean;
+    useDevicePixelRatio?: boolean;
+    wireframe?: boolean;
+}
+
+export interface TextureRendererProperties extends BaseRendererProperties {
+    /** 经纬度范围 */
+    extent: __esri.ExtentProperties;
+    /** 海拔高度 */
+    elevation?: number;
+    /** 贴图地址， 如果跨域， 则必须配置允许 cors 访问 */
+    textureUrl: string;
+    opacity?: number;
+    /** 刷新时间间隔， 以毫秒为单位, 大于 0 起效 */
+    refreshInterval?: number;
+}
+
+export interface TextureRenderer extends __esri.ExternalRenderer {
+    loadTexture(url: string): Promise<any>;
+}
+
+/** 创建外部贴图渲染器(ThreeJS) */
+export async function createTextureRenderer(
+    properties: TextureRendererProperties
+): Promise<TextureRenderer> {
+    const [Texture] = await loadModules([
+        'beginor/renderers/3d/TextureRenderer']
+    );
+    return new Texture.TextureRenderer(properties);
+}
+
+// export async function createClientFeatureLayer(
+//     properties: __esri.FeatureLayerProperties
+// ): Promise<__esri.FeatureLayer> {
+
+// }
+
+// export async function updateClientFeatureLayer(
+//     properties: __esri.FeatureLayerProperties
+// ): Promise<void> {
+
+// }
