@@ -437,14 +437,18 @@ async function castLayers(properties: __esri.MapProperties) {
     // basemap
     if (!!properties.basemap && typeof properties.basemap !== 'string') {
         const basemapProps = properties.basemap as __esri.BasemapProperties;
-        const layersProps = basemapProps.baseLayers as any[];
-        basemapProps.baseLayers = await createLayers(layersProps);
+        if (!!basemapProps.baseLayers) {
+            const layersProps = basemapProps.baseLayers as any[];
+            basemapProps.baseLayers = await createLayers(layersProps);
+        }
     }
     // ground;
     if (!!properties.ground && typeof properties.ground !== 'string') {
         const groundProps = properties.ground as __esri.GroundProperties;
-        const layersProps = groundProps.layers as any[];
-        groundProps.layers = await createLayers(layersProps);
+        if (!!groundProps.layers) {
+            const layersProps = groundProps.layers as any[];
+            groundProps.layers = await createLayers(layersProps);
+        }
     }
 }
 
@@ -478,6 +482,9 @@ export async function createLayer<T extends __esri.Layer>(
                 'esri/layers/FeatureLayer'
             ]);
             layer = new FeatureLayer(props);
+            break;
+        case 'client-feature':
+            layer = await createClientFeatureLayer(props) as any;
             break;
         case 'graphics':
             const [GraphicsLayer] = await loadModules([
@@ -872,14 +879,82 @@ export async function createTextureRenderer(
     return new Texture.TextureRenderer(properties);
 }
 
-// export async function createClientFeatureLayer(
-//     properties: __esri.FeatureLayerProperties
-// ): Promise<__esri.FeatureLayer> {
+/** 先查询 FeatureLayer 服务的要素集 (FeatureSet) ， 然后在客户端创建专题图层 (FeatureLayer) */
+export async function createClientFeatureLayer(
+    properties: __esri.FeatureLayerProperties
+): Promise<__esri.FeatureLayer> {
+    const featureSet = await executeQuery(
+        properties.url,
+        {
+            returnGeometry: true,
+            outFields: properties.outFields,
+            where: properties.definitionExpression
+        }
+    );
+    const { url, outFields, definitionExpression } = properties;
+    delete properties.url;
+    delete properties.outFields;
+    delete properties.definitionExpression;
+    properties.fields = featureSet.fields;
+    properties.source = featureSet.features;
+    properties.spatialReference = featureSet.spatialReference;
+    properties.displayField = featureSet.displayFieldName;
+    const layer = await createFeatureLayer(properties);
+    // tslint:disable: no-string-literal
+    layer['__url'] = url;
+    layer['__outFields'] = JSON.stringify(outFields);
+    layer['__definitionExpression'] = definitionExpression;
+    // tslint:enable: no-string-literal
+    return layer;
+}
 
-// }
+export async function updateClientFeatureLayer(
+    layer: __esri.FeatureLayer,
+    params: ClientFeatureLayerUpdateParams
+): Promise<void> {
+    if (!layer.source) {
+        throw new Error(
+            `layer ${layer.id}-${layer.title} is not client feature layer`
+        );
+    }
+    // tslint:disable: no-string-literal
+    let url = layer['__url'] as string;
+    if (!!params.url && params.url !== url) {
+        url = params.url;
+    }
+    let outFields = layer['__outFields'] as string;
+    if (!!params.outFields) {
+        const outFieldsStr = JSON.stringify(params.outFields);
+        if (outFields !== outFieldsStr) {
+            outFields = outFieldsStr;
+        }
+    }
+    let definitionExpression = layer['__definitionExpression'] as string;
+    if (!!params.definitionExpression
+        && params.definitionExpression !== definitionExpression) {
+        definitionExpression = params.definitionExpression;
+    }
+    const featureSet = await executeQuery(
+        url,
+        {
+            returnGeometry: true,
+            outFields: JSON.parse(outFields),
+            where: definitionExpression
+        }
+    );
+    layer.fields = featureSet.fields;
+    layer.source = featureSet.features as any;
+    layer.spatialReference = featureSet.spatialReference;
+    layer.displayField = featureSet.displayFieldName;
+    layer.refresh();
+    layer['__url'] = url;
+    layer['__outFields'] = outFields;
+    layer['__definitionExpression'] = definitionExpression;
+    // tslint:enable: no-string-literal
+}
 
-// export async function updateClientFeatureLayer(
-//     properties: __esri.FeatureLayerProperties
-// ): Promise<void> {
-
-// }
+export interface ClientFeatureLayerUpdateParams {
+    url?: string;
+    outFields?: string[];
+    definitionExpression?: string;
+}
