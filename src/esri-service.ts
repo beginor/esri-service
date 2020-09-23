@@ -59,11 +59,11 @@ export async function createBasemapFromId(
 export async function createMap(
     properties: __esri.MapProperties
 ): Promise<__esri.Map> {
-    await castLayers(properties);
+    await createMapLayers(properties);
     const [Map] = await loadModules([
         'esri/Map'
     ]);
-    await castLayers(properties);
+    await createMapLayers(properties);
     return new Map(properties);
 }
 
@@ -421,14 +421,14 @@ export async function createCollection<T>(
 export async function createWebScene(
     properties: __esri.WebSceneProperties
 ): Promise<__esri.WebScene> {
-    await castLayers(properties);
+    await createMapLayers(properties);
     let webscene: __esri.WebScene;
     const [WebScene] = await loadModules(['esri/WebScene']);
     webscene = new WebScene(properties);
     return webscene;
 }
 
-async function castLayers(properties: __esri.MapProperties) {
+async function createMapLayers(properties: __esri.MapProperties) {
     // layers
     if (!!properties.layers) {
         const layersProps = properties.layers as any[];
