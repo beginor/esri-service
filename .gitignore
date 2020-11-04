@@ -42,3 +42,5 @@ e2e/*.map
 Thumbs.db
 
 build
+
+package-lock.json
